@@ -18,10 +18,27 @@ Run `make` command.
 
 You need to create an IVSHMEM device for your VM. Follow the instruction in the [Scream IVSHMEM](https://github.com/duncanthrax/scream/) README.
 
-Launch your VM, make sure to have write permission for the shared memory device of your linux guest, in the example /dev/shm/scream-ivshmem,  then execute the following command inside the VM:
+Launch your VM and verify that you can see the IVSHMEM device with `lspci`.
+
+The output should look like the following:
 
 ```shell
-$ scream-ivshmem-pulse-transmitter /dev/shm/scream-ivshmem
+00:06.0 RAM memory: Red Hat, Inc. Inter-VM shared memory (rev 01)
+        Subsystem: Red Hat, Inc. QEMU Virtual Machine
+        .......
+```
+Now you can access the shared memory in the guest using sysfs.
+
+From the output of `lspci` we can conclude that the device is at `00:06.0`. This will vary in your machine, use your value.
+
+For `00:06.0` you should have this file: `/sys/devices/pci0000:00/0000:00:06.0/resource2_wc`. This is the shared memory.
+
+You can check the file size, it should match the size you set in the host for IVSHMEM.
+
+Once you know the shared memory file you can run the transmitter like this:
+
+```shell
+$ scream-ivshmem-pulse-transmitter /sys/devices/pci0000:00/0000:00:06.0/resource2_wc
 ```
 
 Take a look at the command line parameters if you want to set sample rate, sample size or number of channels.
